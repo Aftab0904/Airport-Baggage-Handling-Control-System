@@ -1,0 +1,83 @@
+// **************************************************************************
+// PROJECT: Airport Baggage Handling Control System
+// BLOCK:   FB_BaggageRouting [FB100]
+// LANGUAGE: SCL (Structured Control Language)
+// **************************************************************************
+
+FUNCTION_BLOCK "FB_BaggageRouting"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT 
+      i_Scan_Trigger : Bool;       // Trigger from barcode scanner
+      i_Bag_ID : DInt;             // Scanned Bag ID
+      i_Destination_ID : Int;       // Routing Destination from WMS
+      i_Conveyor_Speed : Real;      // Current belt speed (m/s)
+      i_Emergency_Stop : Bool;      // Global E-Stop
+      i_Diverter_Status : Bool;     // Diverter Ready/Fault
+   END_VAR
+
+   VAR_OUTPUT 
+      o_Conveyor_Run : Bool;        // Motor contactor signal
+      o_Divert_Command : Bool;      // Diverter solenoid trigger
+      o_System_Fault : Bool;        // Fault state for SCADA
+      o_Routing_Complete : Bool;    // Handshake signal
+   END_VAR
+
+   VAR 
+      s_Bag_In_Transit : Bool;      // State: Bag is moving to divert point
+      s_Travel_Timer : TON;         // Timer for distance-to-divert calculation
+      s_Fault_Timer : TON;          // Timer to detect jam/lost bag
+      s_Calculated_Travel_Time : Time;
+   END_VAR
+
+   VAR_TEMP
+      t_Safe_Distance : Real := 0.8; // Meters between bags
+   END_VAR
+
+
+BEGIN
+    // 1. EMERGENCY STOP LOGIC
+    IF i_Emergency_Stop THEN
+        o_Conveyor_Run := FALSE;
+        o_Divert_Command := FALSE;
+        s_Bag_In_Transit := FALSE;
+        RETURN;
+    END_IF;
+
+    // 2. ROUTING CALCULATION
+    // Formula: Time = Distance (Fixed 5m to diverter) / Speed
+    IF i_Scan_Trigger AND NOT s_Bag_In_Transit THEN
+        s_Bag_In_Transit := TRUE;
+        // Simple kinematic calculation for divert timing
+        s_Calculated_Travel_Time := REAL_TO_TIME((5.0 / i_Conveyor_Speed) * 1000.0);
+    END_IF;
+
+    // 3. TRACKING TIMER
+    s_Travel_Timer(IN := s_Bag_In_Transit, PT := s_Calculated_Travel_Time);
+
+    // 4. DIVERT EXECUTION
+    // If timer reaches setpoint and destination matches divert point (ID 1 for this module)
+    IF s_Travel_Timer.Q AND (i_Destination_ID = 1) THEN
+        IF i_Diverter_Status THEN
+            o_Divert_Command := TRUE;
+            s_Bag_In_Transit := FALSE;
+            o_Routing_Complete := TRUE;
+        ELSE
+            // FAULT SCENARIO: Diverter Jammed -> Reroute Logic
+            o_System_Fault := TRUE;
+            // Rerouting: Keep bag on main line to next available divert
+            o_Divert_Command := FALSE; 
+            s_Bag_In_Transit := FALSE;
+        END_IF;
+    END_IF;
+
+    // 5. MOTOR CONTROL
+    // Conveyor runs if no fault and diverter is not blocking flow
+    o_Conveyor_Run := NOT i_Emergency_Stop AND NOT o_System_Fault;
+
+    // 6. FAULT RESET LOGIC (Simulated)
+    IF NOT i_Scan_Trigger AND o_Routing_Complete THEN
+        o_Routing_Complete := FALSE;
+    END_IF;
+
+END_FUNCTION_BLOCK
