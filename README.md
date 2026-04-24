@@ -73,6 +73,20 @@ graph TD
 
 ---
 
+## Advanced System Analytics
+The control system integrates a data-driven layer to monitor long-term system performance and identify mechanical degradation before failures occur.
+
+### Operational Performance Dashboard
+The visualization below captures a 24-hour operational cycle, highlighting peak flight clusters and the corresponding system response.
+
+![System Analytics Dashboard](assets/system_analytics_dashboard.png)
+
+- **Throughput Dynamics:** Real-time BPH tracking with a polynomial trendline identifying peak saturation periods.
+- **Failure Mode Distribution:** Granular breakdown of faults, showing that diverter jams remain the primary bottleneck, followed by sensor blockages.
+- **Efficiency Benchmarking:** Cumulative performance metrics compared against a target goal of 2,500 bags per hour.
+
+---
+
 ## Lead Engineer: Failure Scenarios and Risk Mitigation
 | Failure Mode | Detection Logic | Mitigation Strategy |
 | :--- | :--- | :--- |
