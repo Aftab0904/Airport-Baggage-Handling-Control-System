@@ -1,0 +1,19 @@
+// **************************************************************************
+// BLOCK: FC_Kinematics [FC101]
+// PURPOSE: Pure calculation for travel time based on distance and speed.
+// **************************************************************************
+FUNCTION "FC_Kinematics" : Time
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT 
+      i_Distance : Real; // Meters
+      i_Speed : Real;    // Meters per second
+   END_VAR
+
+BEGIN
+    IF i_Speed > 0.1 THEN
+        FC_Kinematics := REAL_TO_TIME((i_Distance / i_Speed) * 1000.0);
+    ELSE
+        FC_Kinematics := T#0s;
+    END_IF;
+END_FUNCTION

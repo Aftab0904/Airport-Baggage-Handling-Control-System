@@ -1,5 +1,10 @@
-# Airport Baggage Handling Control System
+# Intelligent Baggage Control System (S7-1500 + RAG)
 ### End-to-End PLC-Based Sortation and Routing Engineering
+
+> **NEW: AI-Augmented Control System Upgrade**
+> This project has been upgraded from a traditional PLC-only control system to an AI-Augmented architecture. It now features **Multi-Agent Diagnostics (CrewAI)**, **Autonomous Troubleshooting Workflows (LangGraph)**, and a **Modular SCL Library**.
+> 
+> See [README_AI_UPGRADE.md](README_AI_UPGRADE.md) for details on the AI layers.
 
 ![PLC SCL](https://img.shields.io/badge/PLC-SCL%20%2F%20STL-blue?style=for-the-badge)
 ![Profinet](https://img.shields.io/badge/Network-Profinet-red?style=for-the-badge)
@@ -105,7 +110,8 @@ The visualization below captures a 24-hour operational cycle, highlighting peak 
 ---
 
 ## Project Structure
-- plc_logic/: Core SCL scripts and function blocks for baggage routing.
+- ai_agents/: CrewAI and LangGraph agents for industrial diagnostics and troubleshooting.
+- plc_logic/: Core SCL scripts. Includes a `/modular_library` for production-ready code.
 - hmi_scada/: Tag mapping, display configurations, and visualization specs.
 - src/: Python-based system simulation for logic validation.
 - docs/: Technical specifications and Profinet network layouts.

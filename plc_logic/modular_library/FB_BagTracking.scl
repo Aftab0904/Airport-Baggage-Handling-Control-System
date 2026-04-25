@@ -1,0 +1,38 @@
+// **************************************************************************
+// BLOCK: FB_BagTracking [FB101]
+// PURPOSE: Tracks bag position using a virtual timer.
+// **************************************************************************
+FUNCTION_BLOCK "FB_BagTracking"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT 
+      i_Scan_Trigger : Bool;
+      i_Travel_Time : Time;
+      i_Reset : Bool;
+   END_VAR
+
+   VAR_OUTPUT 
+      o_In_Transit : Bool;
+      o_At_Divert_Point : Bool;
+   END_VAR
+
+   VAR 
+      s_Timer : TON;
+   END_VAR
+
+BEGIN
+    IF i_Scan_Trigger THEN
+        o_In_Transit := TRUE;
+    END_IF;
+
+    s_Timer(IN := o_In_Transit, PT := i_Travel_Time);
+
+    IF s_Timer.Q THEN
+        o_In_Transit := FALSE;
+        o_At_Divert_Point := TRUE;
+    END_IF;
+
+    IF i_Reset THEN
+        o_At_Divert_Point := FALSE;
+    END_IF;
+END_FUNCTION_BLOCK

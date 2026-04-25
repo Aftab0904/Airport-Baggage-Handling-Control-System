@@ -1,0 +1,30 @@
+// **************************************************************************
+// BLOCK: FB_DivertControl [FB102]
+// PURPOSE: Handles physical diverter actuation and fault detection.
+// **************************************************************************
+FUNCTION_BLOCK "FB_DivertControl"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT 
+      i_Activate : Bool;
+      i_Diverter_Status : Bool; // Feedback from sensor
+   END_VAR
+
+   VAR_OUTPUT 
+      o_Solenoid : Bool;
+      o_Fault : Bool;
+   END_VAR
+
+BEGIN
+    IF i_Activate THEN
+        IF i_Diverter_Status THEN
+            o_Solenoid := TRUE;
+            o_Fault := FALSE;
+        ELSE
+            o_Solenoid := FALSE;
+            o_Fault := TRUE;
+        END_IF;
+    ELSE
+        o_Solenoid := FALSE;
+    END_IF;
+END_FUNCTION_BLOCK
