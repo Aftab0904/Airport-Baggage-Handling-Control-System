@@ -1,117 +1,97 @@
 # Intelligent Baggage Control System (S7-1500 + RAG)
 ### End-to-End PLC-Based Sortation and Routing Engineering
 
-> **NEW: AI-Augmented Control System Upgrade**
-> This project has been upgraded from a traditional PLC-only control system to an AI-Augmented architecture. It now features **Multi-Agent Diagnostics (CrewAI)**, **Autonomous Troubleshooting Workflows (LangGraph)**, and a **Modular SCL Library**.
-> 
-> See [README_AI_UPGRADE.md](README_AI_UPGRADE.md) for details on the AI layers.
-
 ![PLC SCL](https://img.shields.io/badge/PLC-SCL%20%2F%20STL-blue?style=for-the-badge)
-![Profinet](https://img.shields.io/badge/Network-Profinet-red?style=for-the-badge)
-![SCADA](https://img.shields.io/badge/SCADA-Ignition%20%2F%20WinCC-orange?style=for-the-badge)
-![Python](https://img.shields.io/badge/Simulation-Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Mermaid](https://img.shields.io/badge/Mermaid-Architecture-FF69B4?style=for-the-badge)
+![RAG](https://img.shields.io/badge/AI-RAG%20Architecture-green?style=for-the-badge)
+![CrewAI](https://img.shields.io/badge/Agents-CrewAI-red?style=for-the-badge)
+![LangGraph](https://img.shields.io/badge/Workflow-LangGraph-orange?style=for-the-badge)
+![Profinet](https://img.shields.io/badge/Network-Profinet-blue?style=for-the-badge)
+![Python](https://img.shields.io/badge/Logic-Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 
 ---
 
-## Problem Statement
-Airport baggage handling systems (BHS) are mission-critical infrastructures where a single component failure can cause massive delays and security risks. Traditional systems often lack robust fault-recovery logic and real-time diagnostic visibility.
-
-The Challenge: Engineer a control system that manages high-speed conveyor sortation, ensures "Zero-Collision" routing, and implements automated rerouting logic for hardware failure scenarios (e.g., jammed diverters).
+## Project Overview
+This repository contains a professional-grade control system for an Airport Baggage Handling System (BHS). It features a hybrid architecture combining deterministic Siemens S7-1500 PLC logic with an AI-Augmented Advisory Layer for real-time diagnostics and commissioning support.
 
 ---
 
-## System Architecture and Workflow
-The system utilizes a hierarchical control layer where PLC logic handles real-time execution, and a SCADA layer provides centralized monitoring and historical data logging.
+## AI-Augmented System Architecture
+The system integrates a Retrieval-Augmented Generation (RAG) pipeline and a Multi-Agent system to support human operators and engineers during system faults.
 
 ```mermaid
 graph TD
-    subgraph Sensing_Layer [Industrial Sensing Layer]
-        BS[Barcode Scanner - RFID/Laser]
-        PE[Photo-Eye Sensors - Position]
-        ENC[High-Resolution Encoders]
+    subgraph PLC_Layer [Industrial Control Layer - S7-1500]
+        Logic[Routing Logic]
+        Gap[Gap Control]
+        Fault[Fault Recovery]
     end
 
-    subgraph Control_Layer [PLC Logic - SCL/STL]
-        direction TB
-        Ingest[Scan Data Ingest] --> Logic[Routing Matrix]
-        Logic --> Sync[Velocity Sync Logic]
-        Sync --> Divert[Diverter Command Engine]
-        Divert --> Watchdog[Fault Detection Watchdog]
+    subgraph Data_Extraction [Data Bridge]
+        Extract[Tag Extraction - Snap7/OPC-UA]
+        Events[Event Logging]
     end
 
-    subgraph Execution_Layer [Physical Systems]
-        MOT[Conveyor Motors - VFD]
-        SOL[Diverter Solenoids]
-        ESTOP[Safety Relay - E-Stop]
+    subgraph AI_Advisory_Layer [RAG & Multi-Agent Engine]
+        RAG[(RAG Knowledge Base - Manuals & Logs)]
+        Agents[Multi-Agent Diagnostic - CrewAI]
+        Workflow[Fault Troubleshooting - LangGraph]
     end
 
-    subgraph Monitoring_Layer [SCADA / HMI]
-        DASH[WinCC Dashboard]
-        ALM[Alarm Logging Server]
-        HIS[Throughput Analytics]
-    end
-
-    Sensing_Layer --> Ingest
-    Divert --> MOT & SOL
-    ESTOP -. Priority Interrupt .-> Control_Layer
-    Control_Layer <--> Monitoring_Layer
+    PLC_Layer <--> Data_Extraction
+    Data_Extraction --> Agents
+    RAG <--> Agents
+    Agents --> Workflow
+    Workflow --> Dashboard[Engineer Diagnostic Dashboard]
 ```
 
 ---
 
-## Key Technical Features
+## Multi-Agent Diagnostic System
+The advisory layer employs specialized agents to analyze system behavior:
 
-### 1. PLC Logic Engine (SCL)
-- Deterministic Routing: Uses Structured Control Language (SCL) to calculate millisecond-perfect divert timings based on belt velocity and distance-to-divert.
-- Collision Avoidance: Implements a "Safe-Gap" algorithm that holds upstream feeders if downstream zones are congested.
-- Fault Recovery Logic: Automatically detects diverter jams and re-routes baggage to overflow zones without stopping the entire line.
+### 1. PLC Logic Auditor
+- Goal: Analyze SCL control logic for logical errors and timing mismatches.
+- Scope: Validates travel time calculations and state-machine transitions.
 
-### 2. Profinet Communication
-- Real-time Synchronization: Ensures zero-latency feedback between the PLC and remote I/O nodes.
-- Health Monitoring: Continuous heartbeat monitoring of every node on the ring to identify cable breaks or hardware failures immediately.
+### 2. Network & Sensor Diagnostic Expert
+- Goal: Distinguish between hardware failures and communication delays.
+- Scope: Analyzes Profinet logs and sensor signal stability.
 
-### 3. SCADA and HMI Visualization
-- Real-time Tracking: Visualizes bag flow through the system with dynamic graphic overlays linked to PLC encoders.
-- Diagnostic Alarms: Detailed fault reporting that identifies the exact sensor or actuator responsible for a system halt.
-- Performance Metrics: Automated calculation of Throughput (Bags per hour) and system availability.
+### 3. Performance & Throughput Analyst
+- Goal: Monitor system BPH and identify physical bottlenecks.
+- Scope: Optimizes belt speeds and merge-zone timings.
 
----
-
-## Advanced System Analytics
-The control system integrates a data-driven layer to monitor long-term system performance and identify mechanical degradation before failures occur.
-
-### Operational Performance Dashboard
-The visualization below captures a 24-hour operational cycle, highlighting peak flight clusters and the corresponding system response.
-
-![System Analytics Dashboard](assets/system_analytics_dashboard.png)
-
-- **Throughput Dynamics:** Real-time BPH tracking with a polynomial trendline identifying peak saturation periods.
-- **Failure Mode Distribution:** Granular breakdown of faults, showing that diverter jams remain the primary bottleneck, followed by sensor blockages.
-- **Efficiency Benchmarking:** Cumulative performance metrics compared against a target goal of 2,500 bags per hour.
+### 4. Controls Lead Orchestrator
+- Goal: Synthesize insights from all agents and RAG data.
+- Scope: Provides the final root cause analysis and suggested action plan.
 
 ---
 
-## Lead Engineer: Failure Scenarios and Risk Mitigation
-| Failure Mode | Detection Logic | Mitigation Strategy |
+## Technical Features
+
+### PLC Logic Engine (SCL)
+- Deterministic Routing: Calculates millisecond-perfect divert timings based on belt velocity.
+- Collision Avoidance: Implements a Safe-Gap algorithm for congestion management.
+- Modular Library: Contains reusable blocks for Kinematics, Bag Tracking, and Diverter Control.
+
+### AI & RAG Integration
+- Technical Knowledge Base: RAG system indexed with industrial manuals and troubleshooting guides.
+- Autonomous Workflows: LangGraph-based state machines for automated fault diagnosis (e.g., photo-eye blockage analysis).
+
+---
+
+## Failure Scenarios and Risk Mitigation
+| Failure Mode | Detection Logic | AI Diagnostic Action |
 | :--- | :--- | :--- |
-| Diverter Jam | Time-Out on Divert-Home sensor | Automated Reroute to Overflow Zone |
-| Photo-Eye Blocked | Static signal > 5 seconds | Trigger "Jam Alarm" and stop upstream VFD |
-| Profinet Node Lost | Heartbeat Watchdog Failure | Immediate Controlled Halt of all segments |
-| Emergency Stop | Hardwired Priority Input | Instant Power Cut to VFDs via Safety Relays |
-
----
-
-## Performance Benchmarks
-- Throughput: Optimized to handle up to 3,600 bags per hour per sorter module.
-- Recovery Time: Automated rerouting reduces downtime by 40% compared to manual intervention systems.
-- Sortation Accuracy: 99.9% accuracy via integrated barcode and RFID verification.
+| Diverter Jam | Time-Out on Divert-Home sensor | Suggest mechanical inspection vs. logic delay |
+| Photo-Eye Blocked | Static signal > 5 seconds | Verify signal integrity via Network Agent |
+| Profinet Node Lost | Heartbeat Watchdog Failure | Identify specific node and provide manual reference |
 
 ---
 
 ## Project Structure
-- ai_agents/: CrewAI and LangGraph agents for industrial diagnostics and troubleshooting.
-- plc_logic/: Core SCL scripts. Includes a `/modular_library` for production-ready code.
-- hmi_scada/: Tag mapping, display configurations, and visualization specs.
+- ai_agents/: CrewAI agent definitions and LangGraph troubleshooting workflows.
+- plc_logic/: Core SCL scripts including a modular industrial library.
+- hmi_scada/: Tag mapping and visualization configurations.
 - src/: Python-based system simulation for logic validation.
-- docs/: Technical specifications and Profinet network layouts.
+- docs/: Technical specifications and network layouts.
